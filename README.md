@@ -6,6 +6,6 @@ A collection of scripts and tools to make life easier in the terminal.
 
 ```bash
 cat <<EOF
-source ~/Projects/terminal-helpers/*.sh
+source ~/Projects/terminal-helpers/install.sh
 EOF >> ~/.bashrc
 ```
