@@ -5,9 +5,15 @@ alias pod="kubectl describe pod"
 alias klogs="kubectl logs -f"
 
 function container_creating() {
-    POD=$(kubectl get pods | grep $SERVICE)
-    STATE=$(echo $POD | awk '{print $3}')
-    if [ "$STATE" == "ContainerCreating" ] || [[ "$STATE" == "Init:"* ]]; then
+    POD=$(kubectl get pods | grep "$SERVICE")
+    while [ -z "$POD" ]; do
+        echo "$SERVICE has not yet been created"
+        sleep 1
+        POD=$(kubectl get pods | grep "$SERVICE")
+    done
+
+    STATE=$(echo "$POD" | awk '{print $3}')
+    if [ "$STATE" == "ContainerCreating" ] || [[ "$STATE" == "Init:"* ]] || [[ "$STATE" == "Pending" ]]; then
         echo "$SERVICE is $STATE"
         return 0
     else
@@ -22,15 +28,20 @@ function kwait() {
     while container_creating "$SERVICE"; do
         sleep 5
     done
-    POD=$(kubectl get pods | grep $SERVICE)
-    POD_ID=$(echo $POD | awk '{print $1}')
+    POD=$(kubectl get pods | grep "$SERVICE")
+    POD_ID=$(echo "$POD" | awk '{print $1}')
 
-    kubectl logs -f $POD_ID
+    kubectl logs -f "$POD_ID"
 }
 
 function kssh() {
   SERVICE=$1
-  POD=$(kubectl get pods | grep $SERVICE)
-  POD_ID=$(echo $POD | awk '{print $1}')
-  kubectl exec -it $POD_ID -- /bin/bash
+  POD=$(kubectl get pods | grep "$SERVICE")
+  POD_ID=$(echo "$POD" | awk '{print $1}')
+  kubectl exec -it "$POD_ID" -- /bin/bash
+}
+
+function ksecret() {
+  SECRET=$1
+  kubectl get secret "$SECRET" -o json | jq '.data | map_values(@base64d)'
 }
