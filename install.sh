@@ -1,3 +1,4 @@
+#! /bin/bash -e
 
-source ~/Projects/terminal-helpers/general.sh
-source ~/Projects/terminal-helpers/kube.sh
+source ~/.terminal-helpers/general.sh
+source ~/.terminal-helpers/kube.sh
